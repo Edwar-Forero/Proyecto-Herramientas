@@ -1,5 +1,19 @@
+import numpy as np
 import pandas as pd
 import re
+
+
+def _object_a_str_python(serie: pd.Series) -> pd.Series:
+    """Convierte object a strings de Python (dtype object); evita dtype numpy str en pandas recientes."""
+    out = []
+    for v in serie:
+        if pd.isna(v):
+            out.append(np.nan)
+        elif isinstance(v, str):
+            out.append(v)
+        else:
+            out.append(str(v))
+    return pd.Series(out, index=serie.index, dtype=object)
 
 def estandarizar_nombres_columnas(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -37,14 +51,10 @@ def ajustar_tipos_datos(df: pd.DataFrame) -> pd.DataFrame:
     
     for col in df.columns:
         dtype = str(df[col].dtype)
-        
-        # Objetos a categoría
-        if dtype == 'object':
-            # Convertimos a categoría si hay menos del 40% de valores únicos o máximo 1000 categorías.
-            # Esto es vital para "millones de registros"
-            n_unicos = df[col].nunique(dropna=False)
-            if n_unicos / n_filas < 0.4 or n_unicos < 1000:
-                df[col] = df[col].astype('category')
+
+        # Columnas object (incl. variantes): homogeneizar a str Python para Parquet.
+        if pd.api.types.is_object_dtype(df[col]):
+            df[col] = _object_a_str_python(df[col])
                 
         # Downcast de numéricos
         elif dtype.startswith('float'):
