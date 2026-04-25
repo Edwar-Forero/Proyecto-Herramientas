@@ -5,11 +5,11 @@
 
 | Nombre Completo       | Código  | Rol            | Correo Electrónico       |
 |-----------------------|---------|----------------|--------------------------|
-| Edwar Yamir Forero Blanco        | 2559741  | Colaborador  | edwar.forero@correounivalle.edu.co  |
-| Juan Alejandro Urrego        | cod  | Colaborador  | @correounivalle.edu.co   |
-| Jhojan Serna Henao               | 2259504  | Colaborador  | jhojan.serna@correounivalle.edu.co  |
-| Kevin Hinojosa Osorio            | 2259470  | Colaborador  | kevin.hinojosa@correounivalle.edu.co|
-| est            | cod  | Colaborador  | @correounivalle.edu.co|
+| Edwar Yamir Forero Blanco        | 2559741  | Colaborador  | [edwar.forero@correounivalle.edu.co](mailto:edwar.forero@correounivalle.edu.co)  |
+| Juan Alejandro Urrego            | 2569068  | Colaborador  | [juan.alejandro.urrego@correounivalle.edu.co](mailto:juan.alejandro.urrego@correounivalle.edu.co)   |
+| Jhojan Serna Henao               | 2259504  | Colaborador  | [jhojan.serna@correounivalle.edu.co](mailto:jhojan.serna@correounivalle.edu.co)  |
+| Kevin Hinojosa Osorio            | 2259470  | Colaborador  | [kevin.hinojosa@correounivalle.edu.co](mailto:kevin.hinojosa@correounivalle.edu.co)|
+| Jaider Bermudez Giron            | 2569453  | Colaborador  | [jaider.bermudez@correounivalle.edu.co](mailto:jaider.bermudez@correounivalle.edu.co)|
 
 ## Arquitectura del Sistema:
 El proyecto Sistema de Análisis y Visualización de Estadísticas Vitales en Colombia (2020–2024) utiliza una arquitectura de tres capas (Three-Tier Architecture), diseñada para separar claramente la gestión de datos, la lógica de negocio y la visualización de la información.
