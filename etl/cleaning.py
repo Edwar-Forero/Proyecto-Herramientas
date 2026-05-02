@@ -1,31 +1,6 @@
 import pandas as pd
 import re
 
-def parsear_columnas_eliminar(ruta_archivo: str, tipo_estadistica: str) -> list:
-    """
-    Parsea el archivo colEliminar.md y retorna una lista de columnas a eliminar
-    según el tipo de estadística ('No fetales', 'Fetales', 'Nacimientos').
-    """
-    columnas = []
-    try:
-        with open(ruta_archivo, 'r', encoding='utf-8') as f:
-            contenido = f.read()
-            
-        # Buscar la sección usando regex
-        patron = re.compile(rf'##\s*{tipo_estadistica}\s*\n(.*?)(?=##|$|\Z)', re.DOTALL | re.IGNORECASE)
-        match = patron.search(contenido)
-        
-        if match:
-            lineas = match.group(1).splitlines()
-            for linea in lineas:
-                col = linea.strip()
-                if col and not col.startswith('#'):
-                    columnas.append(col)
-    except Exception as e:
-        print(f"Error al leer {ruta_archivo}: {e}")
-        
-    return columnas
-
 def eliminar_columnas(df: pd.DataFrame, columnas_a_eliminar: list) -> pd.DataFrame:
     columnas_presentes = [col for col in columnas_a_eliminar if col in df.columns]
     if columnas_presentes:
