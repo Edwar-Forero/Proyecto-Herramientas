@@ -32,19 +32,19 @@ class LoadResult:
     inserted_rows: int
 
 
+# =========================
+# CONEXIÓN
+# =========================
 def create_client(settings: MongoAtlasSettings) -> MongoClient:
-    """Crea cliente MongoDB Atlas con Server API v1."""
     return MongoClient(settings.uri, server_api=ServerApi("1"))
 
 
 def ping_client(client: MongoClient) -> None:
-    """Valida conectividad al cluster."""
     client.admin.command("ping")
-    LOGGER.info("Ping exitoso con MongoDB Atlas.")
+    LOGGER.info(" Ping exitoso con MongoDB Atlas.")
 
 
 def ensure_collections(db: Database, names: list[str]) -> None:
-    """Crea colecciones si aun no existen."""
     existing = set(db.list_collection_names())
     for name in names:
         if name not in existing:
@@ -54,11 +54,16 @@ def ensure_collections(db: Database, names: list[str]) -> None:
             LOGGER.info("Coleccion existente: %s", name)
 
 
-def _to_documents(frame: pd.DataFrame) -> list[dict[str, Any]]:
-    """Convierte DataFrame a lista de documentos MongoDB."""
+def _to_documents(frame: pd.DataFrame) -> list[dict]:
     if frame.empty:
         return []
+
+    frame = frame.copy()
+    frame.columns = frame.columns.str.lower().str.strip()
+
     cleaned = frame.where(pd.notnull(frame), None)
+    cleaned = cleaned.astype(object)
+
     return cleaned.to_dict(orient="records")
 
 
@@ -67,7 +72,7 @@ def load_parquet_in_batches(
     parquet_path: Path,
     batch_size: int,
 ) -> LoadResult:
-    """Carga un parquet en lotes usando pandas.read_parquet + insert_many."""
+
     if not parquet_path.exists():
         raise FileNotFoundError(f"No existe archivo parquet: {parquet_path}")
 
@@ -76,7 +81,7 @@ def load_parquet_in_batches(
     inserted_rows = 0
 
     LOGGER.info(
-        "Iniciando carga de %s en %s (%s filas).",
+        "Cargando %s → %s (%s filas)",
         parquet_path.name,
         collection.name,
         f"{total_rows:,}",
@@ -87,14 +92,23 @@ def load_parquet_in_batches(
 
     for start in range(0, total_rows, batch_size):
         end = min(start + batch_size, total_rows)
+
         chunk = frame.iloc[start:end]
         docs = _to_documents(chunk)
+
         if not docs:
             continue
-        collection.insert_many(docs, ordered=False)
+
+        collection.insert_many(
+            docs,
+            ordered=False,
+            bypass_document_validation=True
+        )
+
         inserted_rows += len(docs)
+
         LOGGER.info(
-            "Coleccion %s: lote %s - %s insertado (%s/%s).",
+            "%s: %s - %s (%s/%s)",
             collection.name,
             start + 1,
             end,
@@ -106,33 +120,55 @@ def load_parquet_in_batches(
 
 
 def create_indexes(db: Database) -> None:
-    """Crea indices operativos para consultas BI."""
-    fields = ["ano", "mes", "cod_dpto", "cod_munic", "sexo", "tipo_evento"]
-    target_collections = [
+    collections = [
         "nacimientos",
         "defunciones_fetales",
         "defunciones_no_fetales",
     ]
 
-    for collection_name in target_collections:
-        collection = db[collection_name]
-        for field in fields:
-            index_name = f"idx_{field}"
-            collection.create_index([(field, ASCENDING)], name=index_name, sparse=True)
-        LOGGER.info("Indices creados/verificados para %s.", collection_name)
+    for name in collections:
+        col = db[name]
+
+        # índices simples
+        col.create_index("cod_dpto")
+        col.create_index("cod_munic")
+        col.create_index("ano")
+        col.create_index("mes")
+
+        # índices compuestos (clave)
+        col.create_index(
+            [("cod_dpto", ASCENDING), ("cod_munic", ASCENDING)],
+            name="idx_geo"
+        )
+
+        col.create_index(
+            [("ano", ASCENDING), ("mes", ASCENDING)],
+            name="idx_tiempo"
+        )
+
+        LOGGER.info("Indices creados en %s", name)
 
 
 def _hash_password(password: str) -> str:
-    """Hashea password con PBKDF2-HMAC SHA256."""
     iterations = 200_000
     salt = secrets.token_bytes(16)
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
-    return f"pbkdf2_sha256${iterations}${base64.b64encode(salt).decode()}${base64.b64encode(digest).decode()}"
+
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt,
+        iterations
+    )
+
+    return (
+        f"pbkdf2_sha256${iterations}$"
+        f"{base64.b64encode(salt).decode()}$"
+        f"{base64.b64encode(digest).decode()}"
+    )
 
 
 def seed_users(db: Database) -> None:
-    """Inserta/actualiza usuarios iniciales con upsert por username."""
-    users_collection = db["usuarios"]
+    users = db["usuarios"]
 
     base_users = [
         {"username": "admin", "password": "admin123", "rol": "admin"},
@@ -140,16 +176,16 @@ def seed_users(db: Database) -> None:
         {"username": "consulta", "password": "consulta123", "rol": "consulta"},
     ]
 
-    operations = []
-    for user in base_users:
-        operations.append(
+    ops = []
+    for u in base_users:
+        ops.append(
             UpdateOne(
-                {"username": user["username"]},
+                {"username": u["username"]},
                 {
                     "$set": {
-                        "username": user["username"],
-                        "rol": user["rol"],
-                        "password_hash": _hash_password(user["password"]),
+                        "username": u["username"],
+                        "rol": u["rol"],
+                        "password_hash": _hash_password(u["password"]),
                         "activo": True,
                     }
                 },
@@ -157,17 +193,29 @@ def seed_users(db: Database) -> None:
             )
         )
 
-    users_collection.bulk_write(operations, ordered=False)
-    users_collection.create_index("username", unique=True, name="ux_username")
-    LOGGER.info("Usuarios iniciales insertados/actualizados.")
+    users.bulk_write(ops, ordered=False)
+    users.create_index("username", unique=True)
+
+    LOGGER.info("Usuarios creados")
 
 
-def run_full_load(db: Database, sources: list[DataSource], batch_size: int) -> list[LoadResult]:
-    """Ejecuta carga completa de fuentes parquet."""
+def run_full_load(
+    db: Database,
+    sources: list[DataSource],
+    batch_size: int
+) -> list[LoadResult]:
+
     results: list[LoadResult] = []
-    for source in sources:
-        collection = db[source.collection_name]
-        result = load_parquet_in_batches(collection, source.parquet_path, batch_size=batch_size)
-        results.append(result)
-    return results
 
+    for source in sources:
+        col = db[source.collection_name]
+
+        result = load_parquet_in_batches(
+            col,
+            source.parquet_path,
+            batch_size=batch_size
+        )
+
+        results.append(result)
+
+    return results
