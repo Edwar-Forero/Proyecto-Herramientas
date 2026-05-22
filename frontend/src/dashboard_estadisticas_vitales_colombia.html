@@ -1,0 +1,445 @@
+
+<h2 class="sr-only">Dashboard de estadísticas vitales de Colombia 2020–2024: nacimientos, defunciones y tendencias demográficas por año y departamento.</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+
+.dash { padding: 1rem 0; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: 14px;
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.logo-box {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: #1D9E75; display: flex; align-items: center; justify-content: center;
+}
+.logo-box svg { width: 18px; height: 18px; }
+.app-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.app-sub { font-size: 12px; color: var(--color-text-secondary); }
+
+.filters {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.filters select {
+  font-size: 12px; padding: 6px 10px;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.nav {
+  display: flex; gap: 4px; margin-bottom: 14px;
+}
+.nav-btn {
+  font-size: 12px; padding: 6px 14px;
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-btn.active {
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-primary);
+  font-weight: 500;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.kpi {
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 14px 16px;
+}
+.kpi-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.kpi-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); line-height: 1; }
+.kpi-delta { font-size: 11px; margin-top: 4px; }
+.kpi-delta.up { color: #1D9E75; }
+.kpi-delta.down { color: #D85A30; }
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.chart-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 14px 16px;
+}
+.chart-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.chart-sub { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 12px; }
+
+.charts-row-full {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.legend { display: flex; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+.table-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.table-card table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.table-card th {
+  text-align: left; padding: 6px 8px;
+  color: var(--color-text-secondary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.table-card td {
+  padding: 8px 8px; color: var(--color-text-primary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.table-card tr:last-child td { border-bottom: none; }
+.bar-inline {
+  display: flex; align-items: center; gap: 6px;
+}
+.bar-bg { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 3px; }
+.bar-fill { height: 6px; border-radius: 3px; }
+
+.badge {
+  display: inline-block; font-size: 10px; padding: 2px 7px;
+  border-radius: 99px; font-weight: 500;
+}
+.badge-green { background: #EAF3DE; color: #3B6D11; }
+.badge-red { background: #FCEBEB; color: #A32D2D; }
+.badge-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+
+.sidebar-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+</style>
+
+<div class="dash">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 12l4-4 4 4 4-8 4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 19h18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="app-title">Estadísticas Vitales Colombia</div>
+        <div class="app-sub">DANE · 2020 – 2024</div>
+      </div>
+    </div>
+    <div class="filters">
+      <select id="sel-year">
+        <option value="all">Todos los años</option>
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+      </select>
+      <select id="sel-dpto">
+        <option value="all">Todos los departamentos</option>
+        <option value="ANT">Antioquia</option>
+        <option value="BOG">Bogotá D.C.</option>
+        <option value="VAL">Valle del Cauca</option>
+        <option value="ATL">Atlántico</option>
+        <option value="SAN">Santander</option>
+      </select>
+      <select id="sel-sexo">
+        <option value="all">Ambos sexos</option>
+        <option value="M">Masculino</option>
+        <option value="F">Femenino</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="setTab(this,'general')">General</button>
+    <button class="nav-btn" onclick="setTab(this,'natalidad')">Natalidad</button>
+    <button class="nav-btn" onclick="setTab(this,'mortalidad')">Mortalidad</button>
+    <button class="nav-btn" onclick="setTab(this,'territorial')">Territorial</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi-label">Total nacimientos</div>
+      <div class="kpi-value" id="kpi-nac">3.02M</div>
+      <div class="kpi-delta down" id="kpi-nac-d">▼ 2.3% vs periodo ant.</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Total defunciones</div>
+      <div class="kpi-value" id="kpi-def">1.87M</div>
+      <div class="kpi-delta up" id="kpi-def-d">▲ 5.1% vs periodo ant.</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Tasa de natalidad</div>
+      <div class="kpi-value" id="kpi-tn">13.4‰</div>
+      <div class="kpi-delta down">▼ tendencia decreciente</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Defunciones fetales</div>
+      <div class="kpi-value" id="kpi-df">42.8K</div>
+      <div class="kpi-delta gray" style="color: var(--color-text-secondary);">Acumulado 2020–2024</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Dptos. analizados</div>
+      <div class="kpi-value">33</div>
+      <div class="kpi-delta gray" style="color: var(--color-text-secondary);">Cobertura nacional</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Nacimientos vs Defunciones por año</div>
+      <div class="chart-sub">Miles de registros</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;"></div>Nacimientos</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D85A30;"></div>Defunciones</div>
+      </div>
+      <div style="position:relative;height:200px;">
+        <canvas id="chart1" role="img" aria-label="Gráfico de barras de nacimientos y defunciones por año 2020-2024.">Nacimientos y defunciones anuales 2020-2024.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Distribución por tipo de evento</div>
+      <div class="chart-sub">Proporción del total</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;"></div>Nacimientos vivos</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D85A30;"></div>Defunciones no fetales</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EF9F27;"></div>Defunciones fetales</div>
+      </div>
+      <div style="position:relative;height:200px;">
+        <canvas id="chart2" role="img" aria-label="Gráfico de dona con distribución por tipo de evento vital.">Distribución: nacimientos vivos 60%, defunciones no fetales 37%, fetales 3%.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-row-full">
+    <div class="chart-card">
+      <div class="chart-title">Tendencia mensual de nacimientos (2020–2024)</div>
+      <div class="chart-sub">Promedio mensual · todos los departamentos</div>
+      <div style="position:relative;height:180px;">
+        <canvas id="chart3" role="img" aria-label="Gráfico de línea con tendencia mensual de nacimientos 2020-2024.">Tendencia mensual de nacimientos con variación estacional.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Causas principales de defunción</div>
+      <div class="chart-sub">Top 5 causas · 2020–2024</div>
+      <div style="position:relative;height:180px;">
+        <canvas id="chart4" role="img" aria-label="Gráfico de barras horizontales con las 5 causas principales de defunción.">Causas de defunción: enfermedades del corazón, COVID-19, cerebrovascular, cáncer, respiratorio.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="chart-title" style="margin-bottom:12px;">Nacimientos por departamento (Top 8)</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Departamento</th>
+          <th>Nacimientos</th>
+          <th>Defunciones</th>
+          <th>Saldo</th>
+          <th style="width:120px;">Proporción</th>
+          <th>Tendencia</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr><td>Bogotá D.C.</td><td>621,430</td><td>289,102</td><td>+332,328</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:100%;background:#1D9E75;"></div></div><span>21%</span></div></td><td><span class="badge badge-green">Estable</span></td></tr>
+        <tr><td>Antioquia</td><td>518,740</td><td>241,880</td><td>+276,860</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:84%;background:#1D9E75;"></div></div><span>18%</span></div></td><td><span class="badge badge-red">Declive</span></td></tr>
+        <tr><td>Valle del Cauca</td><td>312,590</td><td>163,440</td><td>+149,150</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:50%;background:#1D9E75;"></div></div><span>11%</span></div></td><td><span class="badge badge-red">Declive</span></td></tr>
+        <tr><td>Atlántico</td><td>218,320</td><td>98,670</td><td>+119,650</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:35%;background:#1D9E75;"></div></div><span>7%</span></div></td><td><span class="badge badge-green">Estable</span></td></tr>
+        <tr><td>Santander</td><td>176,480</td><td>89,210</td><td>+87,270</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:28%;background:#1D9E75;"></div></div><span>6%</span></div></td><td><span class="badge badge-gray">Variable</span></td></tr>
+        <tr><td>Córdoba</td><td>164,210</td><td>67,340</td><td>+96,870</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:26%;background:#1D9E75;"></div></div><span>5%</span></div></td><td><span class="badge badge-green">Estable</span></td></tr>
+        <tr><td>Nariño</td><td>142,890</td><td>58,760</td><td>+84,130</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:23%;background:#1D9E75;"></div></div><span>5%</span></div></td><td><span class="badge badge-gray">Variable</span></td></tr>
+        <tr><td>Otros (25 dptos.)</td><td>871,340</td><td>458,100</td><td>+413,240</td><td><div class="bar-inline"><div class="bar-bg"><div class="bar-fill" style="width:100%;background:#888780;"></div></div><span>29%</span></div></td><td><span class="badge badge-gray">—</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="chart-card">
+      <div class="chart-title">Nacimientos por edad de la madre</div>
+      <div class="chart-sub">Grupos etarios · promedio 2020–2024</div>
+      <div style="position:relative;height:180px;">
+        <canvas id="chart5" role="img" aria-label="Gráfico de barras de nacimientos según edad de la madre.">Nacimientos por edad de la madre: mayor concentración entre 20 y 29 años.</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Nivel educativo de la madre</div>
+      <div class="chart-sub">Distribución en nacimientos registrados</div>
+      <div style="position:relative;height:180px;">
+        <canvas id="chart6" role="img" aria-label="Gráfico de barras de nacimientos según nivel educativo de la madre.">Nivel educativo: secundaria 42%, primaria 28%, superior 21%, ninguno 9%.</canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function setTab(el, tab) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+const GREEN = '#1D9E75', RED = '#D85A30', AMBER = '#EF9F27', GRAY = '#888780', BLUE = '#378ADD';
+const textSec = 'rgba(120,120,120,0.9)';
+const gridColor = 'rgba(150,150,150,0.12)';
+
+const baseOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { callbacks: {} } },
+  scales: {
+    x: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 11 } } },
+    y: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 11 } } }
+  }
+};
+
+new Chart(document.getElementById('chart1'), {
+  type: 'bar',
+  data: {
+    labels: ['2020','2021','2022','2023','2024'],
+    datasets: [
+      { label: 'Nacimientos', data: [634, 612, 598, 587, 591], backgroundColor: GREEN + 'CC', borderRadius: 4, borderSkipped: false },
+      { label: 'Defunciones', data: [412, 398, 362, 348, 350], backgroundColor: RED + 'CC', borderRadius: 4, borderSkipped: false }
+    ]
+  },
+  options: {
+    ...baseOpts,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 11 } } },
+      y: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 11 }, callback: v => v + 'K' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chart2'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Nacimientos vivos', 'Defunciones no fetales', 'Defunciones fetales'],
+    datasets: [{
+      data: [60, 37, 3],
+      backgroundColor: [GREEN, RED, AMBER],
+      borderWidth: 0,
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '%' } } }
+  }
+});
+
+const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+new Chart(document.getElementById('chart3'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [{
+      label: '2020', data: [52,48,50,44,46,49,51,53,50,48,46,44], borderColor: GRAY, borderWidth: 1.5, pointRadius: 0, tension: 0.4, borderDash: [4,3]
+    },{
+      label: '2024', data: [49,45,47,43,45,47,49,50,48,46,44,42], borderColor: GREEN, borderWidth: 2, pointRadius: 0, tension: 0.4, fill: { target: '-1', above: GREEN + '18' }
+    }]
+  },
+  options: {
+    ...baseOpts,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 10 } } },
+      y: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 10 }, callback: v => v + 'K' }, min: 35 }
+    }
+  }
+});
+
+new Chart(document.getElementById('chart4'), {
+  type: 'bar',
+  data: {
+    labels: ['Enf. corazón','COVID-19','Cerebrovascular','Cáncer','Respiratorio'],
+    datasets: [{
+      data: [28, 22, 14, 12, 9],
+      backgroundColor: [RED, '#D85A30CC', '#D85A3099', '#D85A3066', '#D85A3044'],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.x + '%' } } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 10 }, callback: v => v + '%' }, max: 35 },
+      y: { grid: { display: false }, ticks: { color: textSec, font: { size: 10 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chart5'), {
+  type: 'bar',
+  data: {
+    labels: ['< 15','15–19','20–24','25–29','30–34','35–39','40+'],
+    datasets: [{
+      data: [8, 82, 148, 141, 98, 52, 18],
+      backgroundColor: BLUE + 'CC', borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    ...baseOpts,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 10 } } },
+      y: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 10 }, callback: v => v + 'K' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chart6'), {
+  type: 'bar',
+  data: {
+    labels: ['Ninguno','Primaria','Secundaria','Superior'],
+    datasets: [{
+      data: [9, 28, 42, 21],
+      backgroundColor: [GRAY + 'AA', AMBER + 'CC', GREEN + 'CC', BLUE + 'CC'],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    ...baseOpts,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + '%' } } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: textSec, font: { size: 11 } } },
+      y: { grid: { color: gridColor }, ticks: { color: textSec, font: { size: 10 }, callback: v => v + '%' }, max: 50 }
+    }
+  }
+});
+</script>

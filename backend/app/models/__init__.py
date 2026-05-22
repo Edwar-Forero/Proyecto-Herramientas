@@ -1,0 +1,19 @@
+from .collections import (
+    DEFUNCIONES_FETALES,
+    DEFUNCIONES_NO_FETALES,
+    NACIMIENTOS,
+    PREDICCIONES,
+    ROLES,
+    ROLE_LABELS,
+    USUARIOS,
+)
+
+__all__ = [
+    "NACIMIENTOS",
+    "DEFUNCIONES_FETALES",
+    "DEFUNCIONES_NO_FETALES",
+    "USUARIOS",
+    "PREDICCIONES",
+    "ROLES",
+    "ROLE_LABELS",
+]
