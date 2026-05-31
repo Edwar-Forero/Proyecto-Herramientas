@@ -5,7 +5,7 @@ import type {
   DepartmentPoint,
   KPIItem,
   OverviewResponse,
-  PredictionPoint,
+  PredictionsResponse,
   SeriesPoint,
   SystemStatus,
   User,
@@ -69,20 +69,25 @@ export async function getMortalidadByRegion(params?: FilterParams) {
   return data;
 }
 
+export async function getNatalidadHealthRegime(params?: FilterParams): Promise<CategoryPoint[]> {
+  const { data } = await api.get(`/natalidad/by-health-regime${filterQuery(params)}`);
+  return data;
+}
+
+export async function getNatalidadMaternalAge(params?: FilterParams): Promise<CategoryPoint[]> {
+  const { data } = await api.get(`/natalidad/by-maternal-age${filterQuery(params)}`);
+  return data;
+}
+
+
 export async function getComparison(params?: FilterParams): Promise<ComparisonItem[]> {
   const { data } = await api.get(`/analytics/comparison${filterQuery(params)}`);
   return data.comparisons;
 }
 
-export async function getPredictions(params?: FilterParams) {
+export async function getPredictions(params?: FilterParams): Promise<PredictionsResponse> {
   const { data } = await api.get(`/analytics/predictions${filterQuery(params)}`);
-  return data as {
-    natalidad: PredictionPoint[];
-    mortalidad_fetal: PredictionPoint[];
-    mortalidad_no_fetal: PredictionPoint[];
-    model: string;
-    trained_on_years: number[];
-  };
+  return data as PredictionsResponse;
 }
 
 export async function listUsers(): Promise<User[]> {

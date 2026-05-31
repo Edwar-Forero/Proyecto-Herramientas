@@ -45,5 +45,12 @@ class AnalyticsPredictionsResponse(BaseModel):
     natalidad: list[PredictionPoint]
     mortalidad_fetal: list[PredictionPoint]
     mortalidad_no_fetal: list[PredictionPoint]
+    # Datos históricos para graficar junto a la proyección
+    historical_natalidad: list[SeriesPoint] = []
+    historical_fetal: list[SeriesPoint] = []
+    historical_no_fetal: list[SeriesPoint] = []
     model: str
     trained_on_years: list[int]
+    r2_natalidad: float | None = None
+    r2_fetal: float | None = None
+    r2_no_fetal: float | None = None

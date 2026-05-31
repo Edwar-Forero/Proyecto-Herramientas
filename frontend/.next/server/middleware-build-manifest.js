@@ -20,30 +20,25 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/dashboard": [
+    "/dashboard/admin": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/dashboard.js"
+      "static/chunks/pages/dashboard/admin.js"
     ],
-    "/dashboard/analisis": [
+    "/dashboard/mortalidad": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/dashboard/analisis.js"
+      "static/chunks/pages/dashboard/mortalidad.js"
     ],
     "/dashboard/natalidad": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/dashboard/natalidad.js"
     ],
-    "/dashboard/predicciones": [
+    "/dashboard/territorial": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/dashboard/predicciones.js"
-    ],
-    "/login": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/login.js"
+      "static/chunks/pages/dashboard/territorial.js"
     ]
   },
   "ampFirstPages": []

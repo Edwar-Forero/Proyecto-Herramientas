@@ -1,5 +1,21 @@
 {
+  "name": "estadisticas-vitales-colombia",
+  "version": "1.0.0",
+  "description": "Monorepo root — Estadísticas Vitales Colombia",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --prefix-colors \"cyan,magenta\" --names \"BACKEND,FRONTEND\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"cd backend; .\\venv\\Scripts\\python.exe -m uvicorn app.main:app --reload\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "setup": "powershell -NoProfile -ExecutionPolicy Bypass -File ./dev.ps1 --setup-only",
+    "setup:backend": "powershell -NoProfile -ExecutionPolicy Bypass -File ./start_backend.ps1 --setup-only",
+    "setup:frontend": "npm --prefix frontend install"
+  },
   "dependencies": {
-    "pymongo": "^0.0.1-security"
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

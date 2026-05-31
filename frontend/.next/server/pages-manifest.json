@@ -2,9 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/login": "pages/login.js",
-  "/dashboard": "pages/dashboard.js",
-  "/dashboard/natalidad": "pages/dashboard/natalidad.js",
+  "/dashboard/territorial": "pages/dashboard/territorial.js",
   "/dashboard/analisis": "pages/dashboard/analisis.js",
-  "/dashboard/predicciones": "pages/dashboard/predicciones.js"
+  "/dashboard/admin": "pages/dashboard/admin.js",
+  "/dashboard/mortalidad": "pages/dashboard/mortalidad.js",
+  "/dashboard/natalidad": "pages/dashboard/natalidad.js"
 }
