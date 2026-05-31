@@ -60,6 +60,20 @@ export interface PredictionPoint {
   confidence?: number | null;
 }
 
+export interface PredictionsResponse {
+  natalidad: PredictionPoint[];
+  mortalidad_fetal: PredictionPoint[];
+  mortalidad_no_fetal: PredictionPoint[];
+  historical_natalidad: SeriesPoint[];
+  historical_fetal: SeriesPoint[];
+  historical_no_fetal: SeriesPoint[];
+  model: string;
+  trained_on_years: number[];
+  r2_natalidad?: number | null;
+  r2_fetal?: number | null;
+  r2_no_fetal?: number | null;
+}
+
 export interface SystemStatus {
   database: string;
   collections: Record<string, number>;

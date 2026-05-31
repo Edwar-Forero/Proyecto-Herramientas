@@ -15,15 +15,24 @@ from app.services.natalidad_service import natalidad_service
 class PredictionService:
     FORECAST_YEARS = 3
 
-    def _forecast(self, series: list[SeriesPoint], metric: str) -> list[PredictionPoint]:
+    def _forecast(
+        self, series: list[SeriesPoint], metric: str
+    ) -> tuple[list[PredictionPoint], float | None]:
+        """Entrena un modelo de regresión lineal y devuelve (predicciones, R²).
+
+        Devuelve una tupla (predicciones, r2) donde r2 es el coeficiente de
+        determinación del modelo entrenado. Un R² cercano a 1 indica que la
+        tendencia histórica es bien modelada por una recta.
+        """
         if len(series) < 2:
-            return []
+            return [], None
 
         years = np.array([p.year for p in series], dtype=float).reshape(-1, 1)
         values = np.array([p.value for p in series], dtype=float)
 
         model = LinearRegression()
         model.fit(years, values)
+        r2 = round(float(model.score(years, values)), 3)
 
         last_year = int(series[-1].year)
         predictions: list[PredictionPoint] = []
@@ -35,10 +44,10 @@ class PredictionService:
                     year=y,
                     predicted=max(0, round(pred, 0)),
                     metric=metric,
-                    confidence=round(model.score(years, values), 3),
+                    confidence=r2,
                 )
             )
-        return predictions
+        return predictions, r2
 
     async def predict(
         self,
@@ -51,12 +60,22 @@ class PredictionService:
 
         trained_years = sorted({p.year for p in births})
 
+        nat_preds, r2_nat = self._forecast(births, "Nacimientos")
+        fetal_preds, r2_fetal = self._forecast(fetal, "Defunciones fetales")
+        nofetal_preds, r2_nofetal = self._forecast(no_fetal, "Defunciones no fetales")
+
         return AnalyticsPredictionsResponse(
-            natalidad=self._forecast(births, "Nacimientos"),
-            mortalidad_fetal=self._forecast(fetal, "Defunciones fetales"),
-            mortalidad_no_fetal=self._forecast(no_fetal, "Defunciones no fetales"),
-            model="LinearRegression (scikit-learn)",
+            natalidad=nat_preds,
+            mortalidad_fetal=fetal_preds,
+            mortalidad_no_fetal=nofetal_preds,
+            historical_natalidad=births,
+            historical_fetal=fetal,
+            historical_no_fetal=no_fetal,
+            model="Regresión Lineal (scikit-learn)",
             trained_on_years=trained_years,
+            r2_natalidad=r2_nat,
+            r2_fetal=r2_fetal,
+            r2_no_fetal=r2_nofetal,
         )
 
 
